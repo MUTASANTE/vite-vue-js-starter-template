@@ -1,0 +1,53 @@
+{
+  "name": "DEMO",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@casl/ability": "*",
+    "@casl/vue": "*",
+    "@fortawesome/fontawesome-svg-core": "*",
+    "@fortawesome/free-brands-svg-icons": "*",
+    "@fortawesome/free-regular-svg-icons": "*",
+    "@fortawesome/free-solid-svg-icons": "*",
+    "@fortawesome/vue-fontawesome": "*",
+    "@popperjs/core": "*",
+    "@vee-validate/i18n": "*",
+    "@vee-validate/rules": "*",
+    "axios": "*",
+    "bootstrap": "5.*",
+    "bootstrap-vue-next": ">0.26.4",
+    "vee-validate": "*",
+    "vue": "*",
+    "vue-i18n": ">=10.*",
+    "vue-imask": "*",
+    "vue-router": "*",
+    "vuex": "*"
+  },
+  "devDependencies": {
+    "@rollup/plugin-inject": "*",
+    "@rushstack/eslint-patch": "*",
+    "@types/node": "*",
+    "@vitejs/plugin-vue": "*",
+    "@vue/eslint-config-prettier": "*",
+    "axios-mock-adapter": "*",
+    "eslint": "*",
+    "eslint-plugin-vue": "*",
+    "patch-package": "*",
+    "prettier": "*",
+    "rollup-plugin-gzip": "*",
+    "rollup-plugin-visualizer": "*",
+    "sass": "*",
+    "sass-migrator": "*",
+    "unplugin-vue-components": "*",
+    "vite": "*",
+    "vite-bundle-visualizer": "*",
+    "vite-plugin-node-polyfills": "*",
+    "vue-i18n-extract": "*",
+    "vue-web-component-wrapper": "*"
+  }
+}

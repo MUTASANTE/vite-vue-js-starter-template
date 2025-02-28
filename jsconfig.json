@@ -1,0 +1,9 @@
+{
+  /* How to use intellisense with at symbol ('@') in Vite? */
+  /* https://stackoverflow.com/a/74233713/2332350 */
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
