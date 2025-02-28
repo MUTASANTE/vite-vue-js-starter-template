@@ -1,7 +1,9 @@
-# testme
+# Vue 3 + Vite template
 
 ## Project setup
 ```
+npx degit MUTASANTE/vite-vue-js-starter-template#master project_name
+cd project_name
 npm install
 ```
 
