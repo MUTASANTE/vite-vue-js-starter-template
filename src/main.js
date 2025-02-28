@@ -4,6 +4,7 @@ import store from './store';
 import { init } from './conf';
 import { configure, defineRule, Form } from 'vee-validate';
 import { localize, setLocale } from '@vee-validate/i18n';
+import fr from '@vee-validate/i18n/dist/locale/fr.json';
 import { all } from '@vee-validate/rules';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { createBootstrap } from 'bootstrap-vue-next';
@@ -16,7 +17,7 @@ const app = createApp(App);
 setLocale('fr');
 
 configure({
-  generateMessage: localize('fr'),
+  generateMessage: localize({ fr }),
   // https://vee-validate.logaretm.com/v2/guide/interaction.html
   // https://vee-validate.logaretm.com/v4/guide/components/validation/#customizing-validation-triggers
   validateOnBlur: true, // controls if `blur` events should trigger validation with `handleChange` handler
