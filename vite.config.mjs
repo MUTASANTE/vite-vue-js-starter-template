@@ -27,8 +27,7 @@ export default ({ mode }) => {
       // new dependencies optimized: bootstrap-vue-next/components/BCollapse
       // optimized dependencies changed. reloading
       // https://stackoverflow.com/questions/75469067/vite-cypress-how-to-prevent-reloading-due-to-optimized-dependencies-causin
-      exclude:
-        process.env.NODE_ENV === 'development' ? ['bootstrap-vue-next'] : []
+      exclude: process.env.NODE_ENV === 'development' ? ['bootstrap-vue-next'] : []
     },
     build: {
       // https://vite.dev/config/build-options.html#build-sourcemap
@@ -41,12 +40,7 @@ export default ({ mode }) => {
       preprocessorOptions: {
         scss: {
           api: 'modern-compiler',
-          silenceDeprecations: [
-            'mixed-decls',
-            'color-functions',
-            'global-builtin',
-            'import'
-          ]
+          silenceDeprecations: ['mixed-decls', 'color-functions', 'global-builtin', 'import']
         }
       }
     },
@@ -55,6 +49,10 @@ export default ({ mode }) => {
       {
         ...inject({
           // TODO : variables to inject
+          // ...,
+          // [vite] (client) warning: rollup-plugin-inject: failed to parse index.html?html-proxy&direct&index=0.css.
+          // Consider restricting the plugin to particular files via options.include
+          exclude: '**/*.css'
         }),
         // https://github.com/vitejs/vite/issues/12916#issuecomment-1524962298
         // https://vitejs.dev/guide/api-plugin.html#rollup-plugin-compatibility
