@@ -42,7 +42,7 @@ axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials
 //axios.defaults.withCredentials = true;
 
-init(app, axios);
+init(app, router, axios);
 
 app.use(createBootstrap());
 app.use(router);

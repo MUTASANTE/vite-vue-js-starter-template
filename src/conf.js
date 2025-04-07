@@ -11,18 +11,14 @@ const statusHandler = () => {
  * - correction de l'erreur jQuery "Cannot read property 'fn' of undefined in VueJS"
  * - utilisation du plugin Axios (pour les requêtes serveur asynchrones)
  * @param {*} app application qui sera "mount-é" et affiché
+ * @param {*} router objet Router qui sera utilisé
  * @param {*} axios objet axios qui sera utilisé
  * @param {boolean} autoloadComponents ajout/maj de l'autoloading de composants Vue.js ou non
  * @param {*} jQuery objet jQuery qui sera utilisé (obsolète et redondant avec les capacités natives de Vue.js)
  *
  * NB : ne doit être appelé qu'une seule fois dans l'application Vue.js (idéalement dans main.js) !
  */
-export function init(
-  app,
-  axios = null,
-  autoloadComponents = true,
-  jQuery = null
-) {
+export function init(app, router = null, axios = null, autoloadComponents = true, jQuery = null) {
   // https://github.com/webpack/webpack-dev-server/issues/565
   if (import.meta.env.VITE_DEBUG_MODE && import.meta.hot) {
     import.meta.hot.accept(); // already had this init code
@@ -34,19 +30,25 @@ export function init(
 
     app.config.warnHandler = function (msg, vm, trace) {
       if (console) console.error('warnHandler', msg, trace);
-      typeof window !== 'undefined' &&
-        alert(`ERROR(warnHandler): ${msg}, ${trace}`);
+      typeof window !== 'undefined' && alert(`ERROR(warnHandler): ${msg}, ${trace}`);
     };
 
     app.config.errorHandler = function (msg, vm, trace) {
       if (console) console.error('errorHandler', msg, trace);
-      typeof window !== 'undefined' &&
-        alert(`ERROR(errorHandler): ${msg}, ${trace}`);
+      typeof window !== 'undefined' && alert(`ERROR(errorHandler): ${msg}, ${trace}`);
     };
+
+    if (router) {
+      router.onError((error, to, from) => {
+        if (console) console.error('VUE-ROUTER(onError)', error, to, from);
+        typeof window !== 'undefined' &&
+          alert(`VUE-ROUTER(onError): ${error.name}, ${error.message}, ${error.stack}`);
+      });
+    }
 
     if (typeof window !== 'undefined' && !window.onunhandledrejection) {
       window.onunhandledrejection = event => {
-        if (console) console.error('onunhandledrejection', event.reason);
+        if (console) console.error('onunhandledrejection', event, event.reason);
         alert(`ERROR(onunhandledrejection): ${event.reason}`);
       };
     }
@@ -82,9 +84,15 @@ export function init(
       if (console) console.error('errorHandler', msg, trace);
     };
 
+    if (router) {
+      router.onError((error, to, from) => {
+        if (console) console.error('VUE-ROUTER(onError)', error, to, from);
+      });
+    }
+
     if (typeof window !== 'undefined' && !window.onunhandledrejection) {
       window.onunhandledrejection = event => {
-        if (console) console.error('onunhandledrejection', event.reason);
+        if (console) console.error('onunhandledrejection', event, event.reason);
       };
     }
   }
@@ -164,17 +172,13 @@ export function initAxios(axios) {
       error.message = 'Service indisponible (problème de réseau)';
     } else if (
       error.message &&
-      (matches = /^Request failed with status code ([0-9]+)$/g.exec(
-        error.message.toString()
-      )) &&
+      (matches = /^Request failed with status code ([0-9]+)$/g.exec(error.message.toString())) &&
       matches.length == 2
     ) {
       error.message = `La requête a échoué avec le code statut ${matches[1]}`;
     } else if (
       error.message &&
-      (matches = /^timeout of ([0-9]+)ms exceeded$/g.exec(
-        error.message.toString()
-      )) &&
+      (matches = /^timeout of ([0-9]+)ms exceeded$/g.exec(error.message.toString())) &&
       matches.length == 2
     ) {
       error.message = `Délai de ${matches[1]} ms dépassé`;
@@ -185,45 +189,48 @@ export function initAxios(axios) {
   axios.interceptors.request.use(
     import.meta.env.VITE_DEBUG_MODE
       ? function (config) {
+          const prepend = config.DUMP_ID ? `[DUMP ${config.DUMP_ID}] ` : `[${config.url}] `;
           // https://stackoverflow.com/a/51279029/2332350
           config.__metadata__ = {
             startTime: new Date(),
             endTime: null
           };
           // Log valid request
-          if (console) console.log(`Axios request:\n`, config);
+          if (console) console.log(`${prepend}Axios request:\n`, config);
           return Promise.resolve(config);
         }
       : undefined,
     function (error) {
+      const prepend = error.config?.DUMP_ID
+        ? `[DUMP ${error.config?.DUMP_ID}] `
+        : `[${error.config?.url}] `;
       // On ne loggue pas les données d'authentification.
       if (!error.config?.data?.password) {
         // Log request error
-        if (console) console.error(`Axios request error:\n`, error);
+        if (console) console.error(`${prepend}Axios request error:\n`, error);
       }
       return Promise.reject(error);
     }
   );
   axios.interceptors.response.use(
     function (response) {
+      const prepend = response.config.DUMP_ID
+        ? `[DUMP ${response.config.DUMP_ID}] `
+        : `[${response.config.url}] `;
       // Axios renvoie le "string" response.data tel quel s'il n'arrive pas
       // à le "parser" sous forme d'objet JSON.
       // https://github.com/axios/axios/blob/6642ca9aa1efae47b1a9d3ce3adc98416318661c/lib/defaults.js#L57
       // https://github.com/axios/axios/issues/811
       // https://github.com/axios/axios/issues/61#issuecomment-411815115
-      if (
-        !response.config.DO_NOT_RECEIVE_JSON_DATA &&
-        typeof response.data === 'string'
-      ) {
+      if (!response.config.DO_NOT_RECEIVE_JSON_DATA && typeof response.data === 'string') {
         if (console)
           console.error(
-            `Axios response error (cannot parse response data as JSON object):\n`,
+            `${prepend}Axios response error (cannot parse response data as JSON object):\n`,
             response
           );
         return Promise.reject({
           config: response.config,
-          message:
-            'Les données du serveur sont invalides. Chargement des données impossible.'
+          message: 'Les données du serveur sont invalides. Chargement des données impossible.'
         });
       }
       if (import.meta.env.VITE_DEBUG_MODE && response.config?.__metadata__) {
@@ -231,11 +238,14 @@ export function initAxios(axios) {
         m.endTime = new Date();
         response.__completedIn__ = (m.endTime - m.startTime) / 1000;
         // Log valid response
-        if (console) console.log(`Axios response:\n`, response);
+        if (console) console.log(`${prepend}Axios response:\n`, response);
       }
       return Promise.resolve(response);
     },
     function (error) {
+      const prepend = error.config?.DUMP_ID
+        ? `[DUMP ${error.config?.DUMP_ID}] `
+        : `[${error.config?.url}] `;
       if (import.meta.env.VITE_DEBUG_MODE && error.config?.__metadata__) {
         const m = error.config.__metadata__;
         m.endTime = new Date();
@@ -248,7 +258,7 @@ export function initAxios(axios) {
         error.response?.status !== 401 &&
         !axios.isCancel(error)
       ) {
-        if (console) console.error(`Axios response error:\n`, error);
+        if (console) console.error(`${prepend}Axios response error:\n`, error);
       }
       return Promise.reject(error);
     }
