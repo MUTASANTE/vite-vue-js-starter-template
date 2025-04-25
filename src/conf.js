@@ -207,7 +207,7 @@ export function initAxios(axios) {
       // On ne loggue pas les données d'authentification.
       if (!error.config?.data?.password) {
         // Log request error
-        if (console) console.error(`${prepend}Axios request error:\n`, error);
+        if (console) console.error(`${prepend}Axios request error:\n`, error, error.config);
       }
       return Promise.reject(error);
     }
@@ -258,7 +258,8 @@ export function initAxios(axios) {
         error.response?.status !== 401 &&
         !axios.isCancel(error)
       ) {
-        if (console) console.error(`${prepend}Axios response error:\n`, error);
+        if (console)
+          console.error(`${prepend}Axios response error:\n`, error, error.config, error.response);
       }
       return Promise.reject(error);
     }
